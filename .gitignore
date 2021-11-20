@@ -1,0 +1,7 @@
+.replit
+replit.nix
+.cache/
+.config/
+.upm/
+node_modules/
+package*.json
