@@ -237,16 +237,16 @@ client.on("messageCreate", async msg => {
       break;
     case "deck":
       if (args.length === 0) {
-        msg.reply(Object.values(emoji).map(i => Object.values(i)).flat().map(client.emojis.cache.get).join(""));
+        msg.reply(Object.values(emoji).map(i => Object.values(i)).flat().map(e => client.emojis.cache.get(e).toString()).join(""));
       } else if (args.length === 1){
         if (!emoji[args[0]]) { // why do == undefined casting exists
           msg.reply("Category not found")
           break;
         }
-        msg.reply(Object.values(emoji[args[0]]).map(client.emojis.cache.get).join(""))
+        msg.reply(Object.values(emoji[args[0]]).map(e => client.emojis.cache.get(e).toString()).join(""))
       } else {
         try {
-          msg.reply(emoji[args[0]][args[1]]);
+          msg.reply(client.emojis.cache.get(emoji[args[0]][args[1]]).toString());
         } catch {
           msg.reply("Emote not found.");
         }
