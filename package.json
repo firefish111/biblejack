@@ -1,0 +1,30 @@
+{
+  "name": "biblejack",
+  "version": "1.0.0",
+  "description": "This template provides an easy way to use NodeJS v16 on Replit! As of writing, NodeJS repls have Node v12, which is several years out of date.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firefish111/biblejack.git"
+  },
+  "keywords": [],
+  "author": "Fire Fish <mailsodd@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/firefish111/biblejack/issues"
+  },
+  "homepage": "https://github.com/firefish111/biblejack#readme",
+  "dependencies": {
+    "discord.js": "^13.3.1",
+    "js-markov": "^3.0.3",
+    "jsoning": "^0.12.22",
+    "readline-sync": "^1.4.10",
+    "redis": "^4.0.1"
+  },
+  "engines": {
+    "node": "16.x"
+  }
+}
