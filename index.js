@@ -110,6 +110,10 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
+  await db.hSet(msg.author.id, "balance", 20, {
+    NX: true,
+  });
+
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
   
   if (msg.author.bot) return;
@@ -226,11 +230,6 @@ client.on("messageCreate", async msg => {
       break;
     case "bal":
     case "balance":
-      await db.hSet(msg.author.id, "balance", 20, {
-        NX: true,
-//      GET: true,
-      });
-
       // infinity
       // await db.hSet("658276923218067466", "balance", Number.MAX_VALUE);
       msg.reply(`You currently have ${await db.hGet(msg.author.id, "balance")} ${client.emojis.cache.get(emoji.misc.bible)}.`);
