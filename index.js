@@ -110,9 +110,11 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
+  console.log("among");
   await db.hSet(msg.author.id, "balance", 20, {
     NX: true,
   });
+  console.log("among");
 
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
   
