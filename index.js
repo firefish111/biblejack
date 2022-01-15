@@ -133,8 +133,9 @@ client.on("messageCreate", async msg => {
         return;
       } 
 
-      if (await db.get(msg.author.id) < 0) {
-        msg.reply(`You are ${await db.get(msg.author.id) === 0 ? "broke" : "in debt"}!\nYou cannot bet. (Loans coming soon)`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+      let balanc = db.hGet(msg.author.id, "balance");
+      if (await balanc < 0) {
+        msg.reply(`You are ${await balanc ? "broke" : "in debt"}!\nYou cannot bet. (Loans coming soon)`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
         return;
       }
 
@@ -201,7 +202,7 @@ client.on("messageCreate", async msg => {
         (collect(banker) < 21)
       ) {
         await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
-        await db.incrBy(msg.author.id, stake);
+        await db.hIncrBy(msg.author.id, "balance", stake);
         return;
       }
 
@@ -216,23 +217,23 @@ client.on("messageCreate", async msg => {
 
       if (collect(banker) > 21) {
         await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
-        await db.incrBy(msg.author.id, stake);
+        await db.hIncrBy(msg.author.id, "balance", stake);
         return;
       }
 
       await game.edit({ embeds: [mkEmbed(stake).addField("You lose!", `You lose ${stake} ${client.emojis.cache.get(emoji.misc.bible)}.`)] }); 
-      await db.decrBy(msg.author.id, stake);
+      await db.hDecrBy(msg.author.id, "balance", stake);
       break;
     case "bal":
     case "balance":
-      await db.set(msg.author.id, 20, {
+      await db.hSet(msg.author.id, "balance", 20, {
         NX: true,
 //      GET: true,
       });
 
       // infinity
-      // await db.set("658276923218067466", Number.MAX_VALUE);
-      msg.reply(`You currently have ${await db.get(msg.author.id)} ${client.emojis.cache.get(emoji.misc.bible)}.`);
+      // await db.hSet("658276923218067466", "balance", Number.MAX_VALUE);
+      msg.reply(`You currently have ${await db.hGet(msg.author.id, "balance")} ${client.emojis.cache.get(emoji.misc.bible)}.`);
 
       break;
     case "deck":
