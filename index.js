@@ -131,7 +131,7 @@ client.on("messageCreate", async msg => {
 
       let balanc = db.hGet(msg.author.id, "balance");
       if (await balanc < 0) {
-        msg.reply(`You are ${await balanc ? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefox}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+        msg.reply(`You are ${await balanc ? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
         return;
       }
 
@@ -243,6 +243,11 @@ client.on("messageCreate", async msg => {
       }
       break;
     case "loan":
+      if (args.length === 0) {
+        msg.reply("Please specify an amount to loan.");
+        return;
+      }
+
       let loanAmount = Number(args[0]);
       msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
       db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
