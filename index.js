@@ -243,9 +243,9 @@ client.on("messageCreate", async msg => {
       }
       break;
     case "loan":
-      stake = Number(args[0]);
-      msg.reply(`You are creating a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
-      db.hSet(msg.author.id, "interest", Math.ceil(stake/5));
+      let loanAmount = Number(args[0]);
+      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
+      db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
       break;
     case "interest":
       await db.hSet(msg.author.id, "interest", 0, {
