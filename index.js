@@ -259,7 +259,7 @@ client.on("messageCreate", async msg => {
       });
 
       msg.reply(`You currently owe ${await db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
-      
+      break;
     case "status":
       // courtesy of https://stackoverflow.com/a/54257210
       if (!msg.member.roles.cache.some(role => modSet.includes(role.id))) {
