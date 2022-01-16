@@ -3,6 +3,7 @@ const { Client, Intents, MessageEmbed } = require("discord.js");
 const token = process.env.token;
 const prefix = "$"; // temporary
 const fs = require("fs");
+const fetch = require('node-fetch')
 
 // database
 let { createClient } = require("redis");
@@ -16,6 +17,22 @@ const db = new createClient({
 
 db.connect();
 
+function addLog(id, type, amount, id2){
+	fetch('https://unclejesus.firefish.repl.co/transaction', {
+		method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+		body: JSON.stringify({
+			'token': process.env.log_token,
+			'id': id,
+			'type': type,
+			'amount': amount,
+			'id2': id2,
+		})
+	})
+}
 // Create a new client instance
 const client = new Client({ intents: [
   Intents.FLAGS.GUILDS,
@@ -151,7 +168,7 @@ client.on("messageCreate", async msg => {
         msg.reply("Please specify an amount of bibles to bet.");
         return;
       }
-
+			addLog(msg.author.id, 'bet', args[0])
       let game;
         
       const filter = (reaction, user) => [emoji.misc.hit, emoji.misc.stick].includes(reaction.emoji.id) && user.id === msg.author.id;
