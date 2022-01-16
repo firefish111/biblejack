@@ -243,7 +243,7 @@ client.on("messageCreate", async msg => {
       }
       break;
     case "loan":
-      let stake = Number(args[0]);
+      stake = Number(args[0]);
       msg.reply(`You are creating a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
       db.hSet(msg.author.id, "interest", Math.ceil(stake/5));
       break;
