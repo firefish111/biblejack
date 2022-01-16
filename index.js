@@ -250,14 +250,15 @@ client.on("messageCreate", async msg => {
 
       let loanAmount = Number(args[0]);
       msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
-      db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
+      await db.hIncrBy(msg.author.id, "balance", loanAmount);
+      await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
       break;
     case "interest":
       await db.hSet(msg.author.id, "interest", 0, {
         NX: true,
       });
 
-      msg.reply(`You currently owe ${db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
+      msg.reply(`You currently owe ${await db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
       
     case "status":
       // courtesy of https://stackoverflow.com/a/54257210
