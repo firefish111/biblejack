@@ -92,29 +92,19 @@ let genCard = who => {
 }
 
 let stop;
+let now = Date.now();
+let interestTick;
 
 // When the client is ready, run this code (only once)
 client.once("ready", async () => {
   client.user.setActivity(`for ${prefix}help`, { type: "WATCHING" });
   console.log("Ready!");
-  // grr the code no work 
-  client.channels.fetch("899281353529524264").then(channel => {
-    while (false) { // while false
-//      let message = rl.question("> ");
-      channel.send(message);
-    }
-  })
-    //let message = rl.question("> ");
-    //mods.send({ content: message });
-  
 });
 
 client.on("messageCreate", async msg => {
-  console.log("among");
   await db.hSet(msg.author.id, "balance", 20, {
     NX: true,
   });
-  console.log("among");
 
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
   
@@ -141,7 +131,7 @@ client.on("messageCreate", async msg => {
 
       let balanc = db.hGet(msg.author.id, "balance");
       if (await balanc < 0) {
-        msg.reply(`You are ${await balanc ? "broke" : "in debt"}!\nYou cannot bet. (Loans coming soon)`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+        msg.reply(`You are ${await balanc ? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefox}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
         return;
       }
 
@@ -212,8 +202,6 @@ client.on("messageCreate", async msg => {
         return;
       }
 
-
-
       if (collect(player) <= 21) {
         while (collect(banker) < collect(player) && banker.length < 5) {
           genCard(false);
@@ -254,14 +242,24 @@ client.on("messageCreate", async msg => {
         }
       }
       break;
+    case "loan":
+      let stake = Number(args[0]);
+      msg.reply(`You are creating a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
+      db.hSet(msg.author.id, "interest", Math.ceil(stake/5));
+      break;
+    case "interest":
+      await db.hSet(msg.author.id, "interest", 0, {
+        NX: true,
+      });
+
+      msg.reply(`You currently owe ${db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
+      
     case "status":
       // courtesy of https://stackoverflow.com/a/54257210
-      // revoked access due to nsfw abuse
       if (!msg.member.roles.cache.some(role => modSet.includes(role.id))) {
         msg.reply(`Command ${cmd} not found.`);
         break;
       }
-      // , "899224176374710313"
 
       client.user.setActivity(
         args.slice(["listening", "competing"]
@@ -296,6 +294,8 @@ client.on("messageCreate", async msg => {
           { name: `${prefix}deck [suit [card]]`, value: "Prints all cards if no arguments; single suit if only one argument; or a specific card."},
           { name: `${prefix}balance`, value: "Shows the amount of bibles you have."},
           { name: `${prefix}blackjack amount`, value: "Plays a game of blackjack, betting `amount` bibles."},
+          { name: `${prefix}loan amount`, value: "Creates a loan for `amount`, adding the appropriate amount of interest to your account."},
+          { name: `${prefix}interest [pay amount/all]`, value: "Returns the amount of interest connected to your account.\nAlternatively, use the `pay` subcommand to pay off `amount` bibles or `all` debt."},
         )
         .setTimestamp()
         .setFooter("BibleJack Bot");
