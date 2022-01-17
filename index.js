@@ -102,7 +102,7 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
-  await db.hSetNx(msg.author.id, "balance", 20, {
+  await db.sendCommand("HSETNX", msg.author.id, "balance", 20, {
 //    NX: true,
   });
 
@@ -257,7 +257,7 @@ client.on("messageCreate", async msg => {
       await db.hIncrBy(msg.author.id, "balance", 1);
       break;
     case "interest":
-      await db.hSetNx(msg.author.id, "interest", 0, {
+      await db.sendCommand("HSETNX", msg.author.id, "interest", 0, {
         //NX: true,
       });
 
