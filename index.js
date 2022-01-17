@@ -102,8 +102,8 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
-  await db.hSet(msg.author.id, "balance", 20, {
-    NX: true,
+  await db.hSetNx(msg.author.id, "balance", 20, {
+//    NX: true,
   });
 
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
@@ -257,8 +257,8 @@ client.on("messageCreate", async msg => {
       await db.hIncrBy(msg.author.id, "balance", 1);
       break;
     case "interest":
-      await db.hSet(msg.author.id, "interest", 0, {
-        NX: true,
+      await db.hSetNx(msg.author.id, "interest", 0, {
+        //NX: true,
       });
 
       msg.reply(`You currently owe ${await db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
