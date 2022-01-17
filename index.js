@@ -216,7 +216,7 @@ client.on("messageCreate", async msg => {
       }
 
       await game.edit({ embeds: [mkEmbed(stake).addField("You lose!", `You lose ${stake} ${client.emojis.cache.get(emoji.misc.bible)}.`)] }); 
-      await db.hDecrBy(msg.author.id, "balance", stake);
+      await db.hIncrBy(msg.author.id, "balance", -stake);
       break;
     case "bal":
     case "balance":
@@ -252,6 +252,9 @@ client.on("messageCreate", async msg => {
       msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
       await db.hIncrBy(msg.author.id, "balance", loanAmount);
       await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
+      break;
+    case "give":
+      await db.hIncrBy(msg.author.id, "balance", 1);
       break;
     case "interest":
       await db.hSet(msg.author.id, "interest", 0, {
