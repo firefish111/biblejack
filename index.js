@@ -102,7 +102,7 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
-  await db.sendCommmand(["HSETNX", msg.author.id, "balance", 20]);
+  await db.sendCommand(["HSETNX", msg.author.id, "balance", 20]);
 
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
   
