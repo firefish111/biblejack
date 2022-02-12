@@ -102,8 +102,8 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
-  await db.sendCommand("HSETNX", msg.author.id, "balance", 20, {
-//    NX: true,
+  await db.sendCommand.hSet(msg.author.id, "balance", 20, {
+    NX: true,
   });
 
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
