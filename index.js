@@ -174,6 +174,7 @@ client.on("messageCreate", async msg => {
             switch (collected.first()._emoji.id) {
             case emoji.misc.hit:
               genCard(true);
+              ace(true);
               console.log("h");
               break;
             case emoji.misc.stick:
