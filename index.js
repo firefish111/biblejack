@@ -134,7 +134,7 @@ client.on("messageCreate", async msg => {
       }
 
       stop = false;
-      player = [{card:"A",suit:"hearts"}], // dont tell anyone i rigged it
+      player = [], // dont tell anyone i rigged it
       banker = [
         { card: "down", suit: "misc" },
         { card: "down", suit: "misc" },
