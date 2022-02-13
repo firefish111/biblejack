@@ -127,9 +127,9 @@ client.on("messageCreate", async msg => {
         return;
       } 
 
-      let balanc = db.hGet(msg.author.id, "balance");
-      if (await balanc < 0) {
-        msg.reply(`You are ${await balanc ? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+      let balanc = await db.hGet(msg.author.id, "balance");
+      if (balanc <= 0) {
+        msg.reply(`You are ${balanc === 0? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
         return;
       }
 
@@ -157,7 +157,7 @@ client.on("messageCreate", async msg => {
       do {
         console.log("dbg", collect(player));
         // ace is 1 OR 11
-        ace(true);
+       ace(true);
         
         const embed = mkEmbed(stake);
 
@@ -208,6 +208,13 @@ client.on("messageCreate", async msg => {
         }
       }
 
+      // five-card trick
+      if (player.length === 5 && collect(player) <= 21 && banker.length < 5) {
+        await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
+        await db.hIncrBy(msg.author.id, "balance", stake);
+        return;
+      }
+
       if (collect(banker) > 21) {
         await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
         await db.hIncrBy(msg.author.id, "balance", stake);
@@ -248,9 +255,10 @@ client.on("messageCreate", async msg => {
       }
 
       let loanAmount = Number(args[0]);
-      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
-      await db.hIncrBy(msg.author.id, "balance", loanAmount);
-      await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
+//      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
+//      await db.hIncrBy(msg.author.id, "balance", loanAmount);
+//      await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
+      msg.reply("Unfortunately, loans do not work. Please ask <@!658276923218067466> to reset your balance if you are broke.");
       break;
     case "give":
       await db.hIncrBy(msg.author.id, "balance", 1);
