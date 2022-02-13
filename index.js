@@ -98,7 +98,7 @@ let interestTick;
 // When the client is ready, run this code (only once)
 client.once("ready", async () => {
   client.user.setActivity(`for ${prefix}help`, { type: "WATCHING" });
-  console.log("Ready!");
+  console.log(`Ready! Bot is in ${client.guilds.cache.size} servers.`);
 });
 
 client.on("messageCreate", async msg => {
