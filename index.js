@@ -102,14 +102,15 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async msg => {
-  await db.sendCommand(["HSETNX", msg.author.id, "balance", 20]);
-
   console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
   
   if (msg.author.bot) return;
   // if (msg.channelId != "899056782855524353") return;
 
   if (msg.content.startsWith(prefix)) {
+    // default balance
+    await db.sendCommand(["HSETNX", msg.author.id, "balance", 20]);
+
     let args = msg.content.split(" ");
     let cmd = args.shift().slice(prefix.length); // dynamic
     switch (cmd) {
@@ -130,6 +131,11 @@ client.on("messageCreate", async msg => {
       let balanc = await db.hGet(msg.author.id, "balance");
       if (balanc <= 0) {
         msg.reply(`You are ${balanc === 0? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+        return;
+      }
+
+      if (stake > balanc) {
+        msg.reply("You cannot bet more money than you have.");
         return;
       }
 
@@ -228,6 +234,7 @@ client.on("messageCreate", async msg => {
     case "balance":
       // infinity
       // await db.hSet("658276923218067466", "balance", Number.MAX_VALUE);
+      if 
       msg.reply(`You currently have ${await db.hGet(msg.author.id, "balance")} ${client.emojis.cache.get(emoji.misc.bible)}.`);
 
       break;
