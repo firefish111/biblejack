@@ -234,7 +234,7 @@ client.on("messageCreate", async msg => {
     case "balance":
       // infinity
       // await db.hSet("658276923218067466", "balance", Number.MAX_VALUE);
-      if 
+      // if 
       msg.reply(`You currently have ${await db.hGet(msg.author.id, "balance")} ${client.emojis.cache.get(emoji.misc.bible)}.`);
 
       break;
