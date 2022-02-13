@@ -46,7 +46,7 @@ Array.prototype.choose = function() {
 // blackjack
 let player, banker;
 
-let trueV = (card, used) => /\d+/g.test(card) ? Number(card) : card == "A" ? used ? 1 : 11 : card == "down" ? -1 : 10;
+let trueV = (card, used) => /\d+/g.test(card) ? Number(card) : card == "A" ? (used ? 1 : 11) : (card == "down" ? -1 : 10);
 
 let collect = hand => hand.reduce((total, next) => total + trueV(next.card, next.used), 0);
 
@@ -155,7 +155,7 @@ client.on("messageCreate", async msg => {
       game = await msg.reply({ embeds: [mkEmbed(stake)] });
 
       do {
-        console.log("dbg");
+        console.log("dbg", collect(player));
         // ace is 1 OR 11
         ace(true);
         
