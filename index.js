@@ -140,7 +140,7 @@ client.on("messageCreate", async msg => {
         { card: "down", suit: "misc" },
       ];
 
-      genCard(true); //genCard(true);
+      genCard(true); genCard(true);
 
       if (args.length < 1) {
         msg.reply("Please specify an amount of bibles to bet.");
