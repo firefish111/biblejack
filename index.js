@@ -126,7 +126,12 @@ client.on("messageCreate", async msg => {
       if (stake < 1) {
         msg.reply("Stake cannot be less than one.");
         return;
-      } 
+      }
+
+      if (stake % 1 !== 0) {
+        msg.reply("Stake must be an integer.");
+        return;
+      }
 
       let balanc = await db.hGet(msg.author.id, "balance");
       if (balanc <= 0) {
