@@ -303,6 +303,7 @@ client.on("messageCreate", async msg => {
     case "eval":
       msg.reply("No, not even for bot admins.")
       break;
+    case "mk":
     case "markov":
       if (args.length === 0 || args[0] > MARKOV_CAP)
         args[0] = MARKOV_CAP;
@@ -316,10 +317,10 @@ client.on("messageCreate", async msg => {
         .setDescription(`Help menu`)
         .addFields(
           { name: `${prefix}help`, value: `Shows this help menu.` },
-          { name: `${prefix}markov [length]`, value: "Generate a bible verse with maximum length of `length`. (capped at/default 3000)" },
+          { name: `${prefix}markov/mk [length]`, value: "Generate a bible verse with maximum length of `length`. (capped at/default 3000)" },
           { name: `${prefix}deck [suit [card]]`, value: "Prints all cards if no arguments; single suit if only one argument; or a specific card."},
-          { name: `${prefix}balance`, value: "Shows the amount of bibles you have."},
-          { name: `${prefix}blackjack amount`, value: "Plays a game of blackjack, betting `amount` bibles."},
+          { name: `${prefix}balance/bal`, value: "Shows the amount of bibles you have."},
+          { name: `${prefix}blackjack/bj amount`, value: "Plays a game of blackjack, betting `amount` bibles."},
           { name: `${prefix}loan amount`, value: "Creates a loan for `amount`, adding the appropriate amount of interest to your account."},
           { name: `${prefix}interest [pay amount/all]`, value: "Returns the amount of interest connected to your account.\nAlternatively, use the `pay` subcommand to pay off `amount` bibles or `all` debt."},
         )
