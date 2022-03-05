@@ -340,7 +340,7 @@ client.on("messageCreate", async msg => {
       msg.reply(`Command ${cmd} not found.`)
     }
   } else if (msg.content.includes("nuke")) {
-    msg.channel.send("Did someone say nuke?");
+    msg.channel.send("Did someone say ***nuke***?");
   }
 });
 
