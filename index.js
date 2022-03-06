@@ -339,7 +339,10 @@ client.on("messageCreate", async msg => {
     default:
       msg.reply(`Command ${cmd} not found.`)
     }
-  } else if (msg.content.includes("nuke")) {
+  }
+
+  // triggers (because carl sucks)
+  if (msg.content.includes("nuke")) {
     msg.channel.send("Did someone say ***nuke***?");
   }
 });
