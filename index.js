@@ -289,7 +289,7 @@ client.on("messageCreate", async msg => {
           break;
         }
 
-        let debt = db.hGet(msg.author.id, interest);
+        let debt = db.hGet(msg.author.id, "interest");
 
         let pay = args[1] === "all" ? debt : Number(args[1]);
 
