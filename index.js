@@ -269,11 +269,8 @@ client.on("messageCreate", async msg => {
       let loanAmount = Number(args[0]);
       msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your debt has been adjusted accordingly.\nYou can view your debt using the ${prefix}debt command.`);
       await db.hIncrBy(msg.author.id, "balance", loanAmount);
-      await db.hSet(msg.author.id, "debt", Math.ceil(loanAmount/5));
+      await db.hSet(msg.author.id, "debt", Math.ceil(loanAmount*6/5));
       //msg.reply("Unfortunately, loans do not work. Please ask <@!658276923218067466> to reset your balance if you are broke.");
-      //break;
-    case "give":
-      await db.hIncrBy(msg.author.id, "balance", 1);
       break;
     case "debt":
       await db.sendCommand(["HSETNX", msg.author.id, "debt", 0]);
