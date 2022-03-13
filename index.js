@@ -135,7 +135,7 @@ client.on("messageCreate", async msg => {
 
       let balanc = await db.hGet(msg.author.id, "balance");
       if (balanc <= 0) {
-        msg.reply(`You are ${balanc === 0? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+        msg.reply(`You are ${balanc === 0? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in debt.`);
         return;
       }
 
@@ -267,19 +267,19 @@ client.on("messageCreate", async msg => {
       }
 
       let loanAmount = Number(args[0]);
-      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
+      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your debt has been adjusted accordingly.\nYou can view your debt using the ${prefix}debt command.`);
       await db.hIncrBy(msg.author.id, "balance", loanAmount);
-      await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
+      await db.hSet(msg.author.id, "debt", Math.ceil(loanAmount/5));
       //msg.reply("Unfortunately, loans do not work. Please ask <@!658276923218067466> to reset your balance if you are broke.");
       //break;
     case "give":
       await db.hIncrBy(msg.author.id, "balance", 1);
       break;
-    case "interest":
-      await db.sendCommand(["HSETNX", msg.author.id, "interest", 0]);
+    case "debt":
+      await db.sendCommand(["HSETNX", msg.author.id, "debt", 0]);
 
       if (args.length < 1) {
-        msg.reply(`You currently owe ${await db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
+        msg.reply(`You currently owe ${await db.hGet(msg.author.id, "debt")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}debt pay [amount]/all`);
         break;
       }
 
@@ -289,7 +289,7 @@ client.on("messageCreate", async msg => {
           break;
         }
 
-        let debt = db.hGet(msg.author.id, "interest");
+        let debt = db.hGet(msg.author.id, "debt");
 
         let pay = args[1] === "all" ? debt : Number(args[1]);
 
@@ -303,7 +303,7 @@ client.on("messageCreate", async msg => {
           break;
         }
 
-        db.hIncrBy(msg.author.id, "interest", -pay);
+        db.hIncrBy(msg.author.id, "debt", -pay);
         db.hIncrBy(msg.author.id, "balance", -pay);
       }
       break;
@@ -348,8 +348,8 @@ client.on("messageCreate", async msg => {
           { name: `${prefix}deck [suit [card]]`, value: "Prints all cards if no arguments; single suit if only one argument; or a specific card."},
           { name: `${prefix}balance/bal`, value: "Shows the amount of bibles you have."},
           { name: `${prefix}blackjack/bj amount`, value: "Plays a game of blackjack, betting `amount` bibles."},
-          { name: `${prefix}loan amount`, value: "Creates a loan for `amount`, adding the appropriate amount of interest to your account."},
-          { name: `${prefix}interest [pay amount/all]`, value: "Returns the amount of interest connected to your account.\nAlternatively, use the `pay` subcommand to pay off `amount` bibles or `all` debt."},
+          { name: `${prefix}loan amount`, value: "Creates a loan for `amount`, adding the appropriate amount of debt to your account."},
+          { name: `${prefix}debt [pay amount/all]`, value: "Returns the amount of debt connected to your account.\nAlternatively, use the `pay` subcommand to pay off `amount` bibles or `all` debt."},
         )
         .setTimestamp()
         .setFooter("BibleJack Bot");
