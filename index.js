@@ -63,7 +63,7 @@ Array.prototype.choose = function() {
 // blackjack
 let player, banker;
 
-let trueV = (card, used) => /\d+/g.test(card) ? Number(card) : card == "A" ? used ? 1 : 11 : card == "down" ? -1 : 10;
+let trueV = (card, used) => /\d+/g.test(card) ? Number(card) : card == "A" ? (used ? 1 : 11) : (card == "down" ? -1 : 10);
 
 let collect = hand => hand.reduce((total, next) => total + trueV(next.card, next.used), 0);
 
@@ -109,21 +109,13 @@ let genCard = who => {
 }
 
 let stop;
+let now = Date.now();
+let interestTick;
 
 // When the client is ready, run this code (only once)
 client.once("ready", async () => {
   client.user.setActivity(`for ${prefix}help`, { type: "WATCHING" });
-  console.log("Ready!");
-  // grr the code no work 
-  client.channels.fetch("899281353529524264").then(channel => {
-    while (false) { // while false
-//      let message = rl.question("> ");
-      channel.send(message);
-    }
-  })
-    //let message = rl.question("> ");
-    //mods.send({ content: message });
-  
+  console.log(`Ready! Bot is in ${client.guilds.cache.size} servers.`);
 });
 
 client.on("messageCreate", async msg => {
@@ -133,6 +125,9 @@ client.on("messageCreate", async msg => {
   // if (msg.channelId != "899056782855524353") return;
 
   if (msg.content.startsWith(prefix)) {
+    // default balance
+    await db.sendCommand(["HSETNX", msg.author.id, "balance", 20]);
+
     let args = msg.content.split(" ");
     let cmd = args.shift().slice(prefix.length); // dynamic
     switch (cmd) {
@@ -148,10 +143,21 @@ client.on("messageCreate", async msg => {
       if (stake < 1) {
         msg.reply("Stake cannot be less than one.");
         return;
-      } 
+      }
 
-      if (await db.get(msg.author.id) < 0) {
-        msg.reply(`You are ${await db.get(msg.author.id) === 0 ? "broke" : "in debt"}!\nYou cannot bet. (Loans coming soon)`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in interest.`);
+      if (stake % 1 !== 0) {
+        msg.reply("Stake must be an integer.");
+        return;
+      }
+
+      let balanc = await db.hGet(msg.author.id, "balance");
+      if (balanc <= 0) {
+        msg.reply(`You are ${balanc === 0? "broke" : "in debt"}!\nYou cannot bet. Make a loan using ${prefix}loan [amount].`)//You have to make a loan for ${stake} ${client.emojis.cache.get(emoji.misc.bible)}. You will pay ${Math.ceil(stake / 5)} ${client.emojis.cache.get(emoji.misc.bible)} in debt.`);
+        return;
+      }
+
+      if (stake > balanc) {
+        msg.reply("You cannot bet more money than you have.");
         return;
       }
 
@@ -177,9 +183,9 @@ client.on("messageCreate", async msg => {
       game = await msg.reply({ embeds: [mkEmbed(stake)] });
 
       do {
-        console.log("dbg");
+        console.log("dbg", collect(player));
         // ace is 1 OR 11
-        ace(true);
+       ace(true);
         
         const embed = mkEmbed(stake);
 
@@ -196,6 +202,7 @@ client.on("messageCreate", async msg => {
             switch (collected.first()._emoji.id) {
             case emoji.misc.hit:
               genCard(true);
+              ace(true);
               console.log("h");
               break;
             case emoji.misc.stick:
@@ -218,11 +225,9 @@ client.on("messageCreate", async msg => {
         (collect(banker) < 21)
       ) {
         await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
-        await db.incrBy(msg.author.id, stake);
+        await db.hIncrBy(msg.author.id, "balance", stake);
         return;
       }
-
-
 
       if (collect(player) <= 21) {
         while (collect(banker) < collect(player) && banker.length < 5) {
@@ -231,25 +236,28 @@ client.on("messageCreate", async msg => {
         }
       }
 
+      // five-card trick
+      if (player.length === 5 && collect(player) <= 21 && banker.length < 5) {
+        await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
+        await db.hIncrBy(msg.author.id, "balance", stake);
+        return;
+      }
+
       if (collect(banker) > 21) {
         await game.edit({ embeds: [mkEmbed(stake).addField("You win!", `You win ${stake} ${client.emojis.cache.get(emoji.misc.bible)}!`)] });
-        await db.incrBy(msg.author.id, stake);
+        await db.hIncrBy(msg.author.id, "balance", stake);
         return;
       }
 
       await game.edit({ embeds: [mkEmbed(stake).addField("You lose!", `You lose ${stake} ${client.emojis.cache.get(emoji.misc.bible)}.`)] }); 
-      await db.decrBy(msg.author.id, stake);
+      await db.hIncrBy(msg.author.id, "balance", -stake);
       break;
     case "bal":
     case "balance":
-      await db.set(msg.author.id, 20, {
-        NX: true,
-//      GET: true,
-      });
-
       // infinity
-      // await db.set("658276923218067466", Number.MAX_VALUE);
-      msg.reply(`You currently have ${await db.get(msg.author.id)} ${client.emojis.cache.get(emoji.misc.bible)}.`);
+      // await db.hSet("658276923218067466", "balance", Number.MAX_VALUE);
+      // if 
+      msg.reply(`You currently have ${await db.hGet(msg.author.id, "balance")} ${client.emojis.cache.get(emoji.misc.bible)}.`);
 
       break;
     case "deck":
@@ -269,14 +277,58 @@ client.on("messageCreate", async msg => {
         }
       }
       break;
+    case "loan":
+      if (args.length === 0) {
+        msg.reply("Please specify an amount to loan.");
+        return;
+      }
+
+      let loanAmount = Number(args[0]);
+      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your debt has been adjusted accordingly.\nYou can view your debt using the ${prefix}debt command.`);
+      await db.hIncrBy(msg.author.id, "balance", loanAmount);
+      await db.hSet(msg.author.id, "debt", Math.ceil(loanAmount*6/5));
+      //msg.reply("Unfortunately, loans do not work. Please ask <@!658276923218067466> to reset your balance if you are broke.");
+      break;
+    case "debt":
+      await db.sendCommand(["HSETNX", msg.author.id, "debt", 0]);
+
+      if (args.length < 1) {
+        msg.reply(`You currently owe ${await db.hGet(msg.author.id, "debt")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}debt pay [amount]/all`);
+        break;
+      }
+
+      if (args[0] === "pay") {
+        if (args.length < 2) {
+          msg.reply("Please supply an amount to pay.");
+          break;
+        }
+
+        let debt = await db.hGet(msg.author.id, "debt");
+
+        let pay = args[1] === "all" ? debt : Number(args[1]);
+
+        if (isNaN(pay)) {
+          msg.reply("You must specify a number.");
+          break;
+        }
+
+        if (pay > debt) {
+          msg.reply("You cannot pay off more debt than you have.");
+          break;
+        }
+
+        db.hIncrBy(msg.author.id, "debt", -pay);
+        db.hIncrBy(msg.author.id, "balance", -pay);
+
+        msg.reply(`You have payed off ${pay} ${client.emojis.cache.get(emoji.misc.bible)}. You now owe ${await db.hGet(msg.author.id, "debt")} ${client.emojis.cache.get(emoji.misc.bible)}.`)
+      }
+      break;
     case "status":
       // courtesy of https://stackoverflow.com/a/54257210
-      // revoked access due to nsfw abuse
       if (!msg.member.roles.cache.some(role => modSet.includes(role.id))) {
         msg.reply(`Command ${cmd} not found.`);
         break;
       }
-      // , "899224176374710313"
 
       client.user.setActivity(
         args.slice(["listening", "competing"]
@@ -294,6 +346,7 @@ client.on("messageCreate", async msg => {
     case "eval":
       msg.reply("No, not even for bot admins.")
       break;
+    case "mk":
     case "markov":
       if (args.length === 0 || args[0] > MARKOV_CAP)
         args[0] = MARKOV_CAP;
@@ -307,10 +360,12 @@ client.on("messageCreate", async msg => {
         .setDescription(`Help menu`)
         .addFields(
           { name: `${prefix}help`, value: `Shows this help menu.` },
-          { name: `${prefix}markov [length]`, value: "Generate a bible verse with maximum length of `length`. (capped at/default 3000)" },
+          { name: `${prefix}markov/mk [length]`, value: "Generate a bible verse with maximum length of `length`. (capped at/default 3000)" },
           { name: `${prefix}deck [suit [card]]`, value: "Prints all cards if no arguments; single suit if only one argument; or a specific card."},
-          { name: `${prefix}balance`, value: "Shows the amount of bibles you have."},
-          { name: `${prefix}blackjack amount`, value: "Plays a game of blackjack, betting `amount` bibles."},
+          { name: `${prefix}balance/bal`, value: "Shows the amount of bibles you have."},
+          { name: `${prefix}blackjack/bj amount`, value: "Plays a game of blackjack, betting `amount` bibles."},
+          { name: `${prefix}loan amount`, value: "Creates a loan for `amount`, adding the appropriate amount of debt to your account."},
+          { name: `${prefix}debt [pay amount/all]`, value: "Returns the amount of debt connected to your account.\nAlternatively, use the `pay` subcommand to pay off `amount` bibles or `all` debt."},
         )
         .setTimestamp()
         .setFooter("BibleJack Bot");
@@ -327,6 +382,11 @@ client.on("messageCreate", async msg => {
     default:
       msg.reply(`Command ${cmd} not found.`)
     }
+  }
+
+  // triggers (because carl sucks)
+  if (msg.content.includes("nuke")) {
+    msg.channel.send("Did someone say ***nuke***?");
   }
 });
 
