@@ -286,7 +286,7 @@ client.on("messageCreate", async msg => {
           break;
         }
 
-        let debt = db.hGet(msg.author.id, "debt");
+        let debt = await db.hGet(msg.author.id, "debt");
 
         let pay = args[1] === "all" ? debt : Number(args[1]);
 
@@ -303,7 +303,7 @@ client.on("messageCreate", async msg => {
         db.hIncrBy(msg.author.id, "debt", -pay);
         db.hIncrBy(msg.author.id, "balance", -pay);
 
-        msg.reply(`You have payed off ${pay}${client.emojis.cache.get(emoji.misc.bible)}. You now owe ${db.hGet(msg.author.id, debt)}${client.emojis.cache.get(emoji.misc.bible)}.`)
+        msg.reply(`You have payed off ${pay}${client.emojis.cache.get(emoji.misc.bible)}. You now owe ${await db.hGet(msg.author.id, debt)}${client.emojis.cache.get(emoji.misc.bible)}.`)
       }
       break;
     case "status":
