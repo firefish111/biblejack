@@ -293,7 +293,7 @@ client.on("messageCreate", async msg => {
 
         let pay = args[1] === "all" ? debt : Number(args[1]);
 
-        if (isNan(pay)) {
+        if (isNaN(pay)) {
           msg.reply("You must specify a number.");
           break;
         }
