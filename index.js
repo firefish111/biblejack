@@ -267,18 +267,45 @@ client.on("messageCreate", async msg => {
       }
 
       let loanAmount = Number(args[0]);
-//      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
-//      await db.hIncrBy(msg.author.id, "balance", loanAmount);
-//      await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
-      msg.reply("Unfortunately, loans do not work. Please ask <@!658276923218067466> to reset your balance if you are broke.");
-      break;
+      msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your interest has been adjusted accordingly.\nYou can view your interest using the ${prefix}interest command.`);
+      await db.hIncrBy(msg.author.id, "balance", loanAmount);
+      await db.hSet(msg.author.id, "interest", Math.ceil(loanAmount/5));
+      //msg.reply("Unfortunately, loans do not work. Please ask <@!658276923218067466> to reset your balance if you are broke.");
+      //break;
     case "give":
       await db.hIncrBy(msg.author.id, "balance", 1);
       break;
     case "interest":
       await db.sendCommand(["HSETNX", msg.author.id, "interest", 0]);
 
-      msg.reply(`You currently owe ${await db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
+      if (args.length < 1) {
+        msg.reply(`You currently owe ${await db.hGet(msg.author.id, "interest")} ${client.emojis.cache.get(emoji.misc.bible)} to the loan company.\nYou can pay this off using ${prefix}interest pay [amount]/all`);
+        break;
+      }
+
+      if (args[0] === "pay") {
+        if (args.length < 2) {
+          msg.reply("Please supply an amount to pay.");
+          break;
+        }
+
+        let debt = db.hGet(msg.author.id, interest);
+
+        let pay = args[1] === "all" ? debt : Number(args[1]);
+
+        if (isNan(pay)) {
+          msg.reply("You must specify a number.");
+          break;
+        }
+
+        if (pay > debt) {
+          msg.reply("You cannot pay off more debt than you have.");
+          break;
+        }
+
+        db.hIncrBy(msg.author.id, "interest", -pay);
+        db.hIncrBy(msg.author.id, "balance", -pay);
+      }
       break;
     case "status":
       // courtesy of https://stackoverflow.com/a/54257210
