@@ -3,7 +3,8 @@ const { Client, Intents, MessageEmbed } = require("discord.js");
 const token = process.env.token;
 const prefix = "$"; // temporary
 const fs = require("fs");
-const fetch = require('node-fetch')
+//const fetch = require('node-fetch')
+
 
 // database
 let { createClient } = require("redis");
@@ -17,22 +18,26 @@ const db = new createClient({
 
 db.connect();
 
+// yikes code that jam wrote moment
+/*
 function addLog(id, type, amount, id2){
-	fetch('https://unclejesus.firefish.repl.co/transaction', {
-		method: 'POST',
+  fetch('https://unclejesus.firefish.repl.co/transaction', {
+    method: 'POST',
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-		body: JSON.stringify({
-			'token': process.env.log_token,
-			'id': id,
-			'type': type,
-			'amount': amount,
-			'id2': id2,
-		})
-	})
+    body: JSON.stringify({
+      'token': process.env.log_token,
+      'id': id,
+      'type': type,
+      'amount': amount,
+      'id2': id2,
+    })
+  })
 }
+*/
+
 // Create a new client instance
 const client = new Client({ intents: [
   Intents.FLAGS.GUILDS,
@@ -284,6 +289,12 @@ client.on("messageCreate", async msg => {
       }
 
       let loanAmount = Number(args[0]);
+
+      if (loanAmount <= 1) {
+        msg.reply("You cannot create a loan for a value less than 1.");
+        return;
+      }
+
       msg.reply(`You are creating a loan for ${loanAmount} ${client.emojis.cache.get(emoji.misc.bible)}. Your debt has been adjusted accordingly.\nYou can view your debt using the ${prefix}debt command.`);
       await db.hIncrBy(msg.author.id, "balance", loanAmount);
       await db.hSet(msg.author.id, "debt", Math.ceil(loanAmount*6/5));
